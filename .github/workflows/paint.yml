@@ -1,0 +1,29 @@
+name: Paint Graph
+
+on:
+  workflow_dispatch:
+
+jobs:
+  paint:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Generate commits
+        run: |
+          git config --global user.name "${{ github.actor }}"
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+          
+          for i in {365..1}; do
+            DATE=$(date -d "$i days ago" +"%Y-%m-%dT12:00:00")
+            for c in {1..3}; do
+              echo "$DATE commit $c" >> dummy.txt
+              git add dummy.txt
+              GIT_AUTHOR_DATE="$DATE" GIT_COMMITTER_DATE="$DATE" git commit -m "update" --quiet
+            done
+          done
+          
+          git push origin main
